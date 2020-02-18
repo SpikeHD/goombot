@@ -3,5 +3,5 @@
     "dbname":"",
     "dbhost":"",
     "dbuser":"",
-    "dbpassword":""
+    "dbpass":""
 }
