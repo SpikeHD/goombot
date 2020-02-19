@@ -4,14 +4,16 @@ const client = new Discord.Client()
 
 var mysql = require('mysql')
 
-var con = mysql.createConnection({
+const con = mysql.createPool({
+    connectionLimit: 100,
+    database: config.dbname,
     host: config.dbhost,
     user: config.dbuser,
-    password: config.dbpass
+    password: config.dbpass,
+    charset: "utf8mb4"
   })
 
 var guildPrefixes;
-
 
 client.once('ready', () => {
     console.log('Ready')
