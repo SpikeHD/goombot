@@ -6,7 +6,7 @@ client.commands = new Discord.Collection()
 
 var mysql = require('mysql')
 
-const con = mysql.createPool({
+client.mysql = mysql.createPool({
   connectionLimit: 100,
   database: config.dbname,
   host: config.dbhost,
@@ -15,7 +15,7 @@ const con = mysql.createPool({
   charset: "utf8mb4"
 })
 
-var guildPrefixes;
+client.guildPrefixes;
 
 fs.readdir("./commands/", (err, files) => {
   if (err) throw err
@@ -32,25 +32,30 @@ fs.readdir("./commands/", (err, files) => {
 client.once('ready', () => {
   console.log('Ready')
 
-  con.getConnection(function (err, conn) {
+  client.mysql.getConnection(function (err, conn) {
     if (err) throw err
     console.log("MySQL Database Connected")
 
     //Gets all prefixes
     conn.query(`SELECT GuildID,Prefix FROM ${config.dbname}.guilds`, (err, result) => {
       if (err) throw err
-      guildPrefixes = Object.values(JSON.parse(JSON.stringify(result)))
+      client.guildPrefixes = Object.values(JSON.parse(JSON.stringify(result)))
     })
   })
 })
 
 client.on('message', (message) => {
   //Find the prefix that exists for this guild
-  var prefix = guildPrefixes.find(x => x.GuildID == message.channel.guild.id).Prefix
+  var prefix = client.guildPrefixes.find(x => x.GuildID == message.channel.guild.id).Prefix
 
   if (!message.content.startsWith(prefix) || message.author.bot) return
+  var command = message.content.split(prefix)[1].split(" ")[0],
+    args = message.content.split(' '),
+    cmd = bot.commands.get(command)
 
-  console.log(`${message.author.username}: ${message.content}`)
+  if (cmd) {
+    cmd.run(client, message, args);
+  }
 })
 
 client.login(config.token)
