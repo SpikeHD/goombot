@@ -6,7 +6,7 @@ module.exports.load = (client) => {
         var commands = files.filter(f => f.endsWith("js"))
       
         commands.forEach(command => {
-            console.log(`Loading ${command}`)
+            client.logger.debug(`Loading command: ${command}`)
       
             let props = require(`../commands/${command}`)
             client.commands.set(command.replace('.js', ''), props);
@@ -19,5 +19,7 @@ module.exports.handle = (client, message, prefix) => {
         args = message.content.split(' '),
         cmd = client.commands.get(command)
 
-    if (cmd) cmd.run(client, message, args)
+    if (cmd){
+        cmd.run(client, message, args)
+    }
 }
