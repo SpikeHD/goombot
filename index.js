@@ -1,32 +1,33 @@
-const fs = require('fs')
-const handler = require("./modules/handler.js")
-const config = require('./config.json')
+const handler = require('./modules/handler.js')
 const Discord = require('discord.js')
 const client = new Discord.Client()
+
 client.commands = new Discord.Collection()
+client.config = require('./config.json')
+client.logger = require('./modules/logger.js')
 
 var mysql = require('mysql')
 
 client.mysql = mysql.createPool({
   connectionLimit: 100,
-  database: config.dbname,
-  host: config.dbhost,
-  user: config.dbuser,
-  password: config.dbpass,
-  charset: "utf8mb4"
+  database: client.config.dbname,
+  host: client.config.dbhost,
+  user: client.config.dbuser,
+  password: client.config.dbpass,
+  charset: 'utf8mb4'
 })
 
-handler.load(client);
+handler.load(client)
 
 client.once('ready', () => {
-  console.log('Ready')
+  client.logger.log('Client Ready', 'ready')
 
   client.mysql.getConnection(function (err, conn) {
     if (err) throw err
-    console.log("MySQL Database Connected")
+    client.logger.log('MySQL Database Ready', 'ready')
 
-    //Gets all prefixes
-    conn.query(`SELECT GuildID,Prefix FROM ${config.dbname}.guilds`, (err, result) => {
+    // Gets all prefixes
+    conn.query(`SELECT GuildID,Prefix FROM ${client.config.dbname}.guilds`, (err, result) => {
       if (err) throw err
       client.guildPrefixes = Object.values(JSON.parse(JSON.stringify(result)))
     })
@@ -34,12 +35,12 @@ client.once('ready', () => {
 })
 
 client.on('message', (message) => {
-  //Find the prefix that exists for this guild
-  var prefix = client.guildPrefixes.find(x => x.GuildID == message.channel.guild.id).Prefix
+  // Find the prefix that exists for this guild
+  var prefix = client.guildPrefixes.find(x => x.GuildID === message.channel.guild.id).Prefix
 
   if (!message.content.startsWith(prefix) || message.author.bot) return
 
-  handler.handle(client, message, prefix);
+  handler.handle(client, message, prefix)
 })
 
-client.login(config.token)
+client.login(client.config.token)
