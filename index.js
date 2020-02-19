@@ -1,6 +1,8 @@
+const fs = require('fs')
 const config = require('./config.json')
 const Discord = require('discord.js')
 const client = new Discord.Client()
+bot.commands = new Discord.Collection()
 
 var mysql = require('mysql')
 
@@ -14,6 +16,18 @@ const con = mysql.createPool({
 })
 
 var guildPrefixes;
+
+fs.readdir("./commands/", (err, files) => {
+  if (err) throw err
+  var commands = files.filter(f => f.endsWith("js"))
+
+  commands.forEach(command => {
+      console.log(`Loading ${command}`)
+
+      let props = require(`./commands/${command}`)
+      bot.commands.set(command.replace('.js', ''), props);
+  })
+})
 
 client.once('ready', () => {
   console.log('Ready')
