@@ -1,4 +1,3 @@
-const fs = require('fs')
 const handler = require('./modules/handler.js')
 const Discord = require('discord.js')
 const client = new Discord.Client()
@@ -15,10 +14,10 @@ client.mysql = mysql.createPool({
   host: client.config.dbhost,
   user: client.config.dbuser,
   password: client.config.dbpass,
-  charset: "utf8mb4"
+  charset: 'utf8mb4'
 })
 
-handler.load(client);
+handler.load(client)
 
 client.once('ready', () => {
   client.logger.log('Client Ready', 'ready')
@@ -27,7 +26,7 @@ client.once('ready', () => {
     if (err) throw err
     client.logger.log('MySQL Database Ready', 'ready')
 
-    //Gets all prefixes
+    // Gets all prefixes
     conn.query(`SELECT GuildID,Prefix FROM ${client.config.dbname}.guilds`, (err, result) => {
       if (err) throw err
       client.guildPrefixes = Object.values(JSON.parse(JSON.stringify(result)))
@@ -36,12 +35,12 @@ client.once('ready', () => {
 })
 
 client.on('message', (message) => {
-  //Find the prefix that exists for this guild
-  var prefix = client.guildPrefixes.find(x => x.GuildID == message.channel.guild.id).Prefix
+  // Find the prefix that exists for this guild
+  var prefix = client.guildPrefixes.find(x => x.GuildID === message.channel.guild.id).Prefix
 
   if (!message.content.startsWith(prefix) || message.author.bot) return
 
-  handler.handle(client, message, prefix);
+  handler.handle(client, message, prefix)
 })
 
 client.login(client.config.token)
