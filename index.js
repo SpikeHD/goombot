@@ -51,7 +51,7 @@ client.on('message', (message) => {
   if (!message.content.startsWith(prefix) || message.author.bot) return
   var command = message.content.split(prefix)[1].split(" ")[0],
     args = message.content.split(' '),
-    cmd = bot.commands.get(command)
+    cmd = client.commands.get(command)
 
   if (cmd) {
     cmd.run(client, message, args);
