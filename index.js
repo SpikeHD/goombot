@@ -1,4 +1,5 @@
 const fs = require('fs')
+const handler = require("./modules/handler.js")
 const config = require('./config.json')
 const Discord = require('discord.js')
 const client = new Discord.Client()
@@ -15,19 +16,7 @@ client.mysql = mysql.createPool({
   charset: "utf8mb4"
 })
 
-client.guildPrefixes;
-
-fs.readdir("./commands/", (err, files) => {
-  if (err) throw err
-  var commands = files.filter(f => f.endsWith("js"))
-
-  commands.forEach(command => {
-      console.log(`Loading ${command}`)
-
-      let props = require(`./commands/${command}`)
-      client.commands.set(command.replace('.js', ''), props);
-  })
-})
+handler.load(client);
 
 client.once('ready', () => {
   console.log('Ready')
@@ -49,13 +38,8 @@ client.on('message', (message) => {
   var prefix = client.guildPrefixes.find(x => x.GuildID == message.channel.guild.id).Prefix
 
   if (!message.content.startsWith(prefix) || message.author.bot) return
-  var command = message.content.split(prefix)[1].split(" ")[0],
-    args = message.content.split(' '),
-    cmd = client.commands.get(command)
 
-  if (cmd) {
-    cmd.run(client, message, args);
-  }
+  handler.handle(client, message, prefix);
 })
 
 client.login(config.token)
