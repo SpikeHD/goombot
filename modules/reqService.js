@@ -2,7 +2,7 @@ const http = require('http')
 const { parse } = require('querystring')
 
 exports.startService = (logger) => {
-  http.createServer(function (req, res) {
+  http.createServer((req, res) => {
     if (req.method === 'POST') {
       logger.log('POST: ' + JSON.stringify(parse(req.url)), 'debug')
     }
