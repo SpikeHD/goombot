@@ -5,6 +5,7 @@ const client = new Discord.Client()
 client.commands = new Discord.Collection()
 client.config = require('./config.json')
 client.logger = require('./modules/logger.js')
+client.server = require('./modules/reqService.js')
 
 var mysql = require('mysql')
 
@@ -21,6 +22,8 @@ handler.load(client)
 
 client.once('ready', () => {
   client.logger.log('Client Ready', 'ready')
+
+  client.server.startService(client.logger)
 
   client.mysql.getConnection(function (err, conn) {
     if (err) throw err
