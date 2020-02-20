@@ -23,7 +23,7 @@ handler.load(client)
 client.once('ready', () => {
   client.logger.log('Client Ready', 'ready')
 
-  client.server.startService(client.logger)
+  client.server.startService(client)
 
   client.mysql.getConnection(function (err, conn) {
     if (err) throw err
