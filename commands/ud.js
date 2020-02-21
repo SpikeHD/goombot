@@ -16,6 +16,9 @@ exports.run = (client, message, args) => {
     res.on('end', () => {
       var obj = JSON.parse(data).list[0]
 
+      // Filter square brackets
+      obj.definition = obj.definition.replace(new RegExp(/(\[|\])/, 'g'), '')
+
       var embed = new RichEmbed()
         .setColor('BLUE')
         .setTitle(obj.word + ' - Top Definition with ' + obj.thumbs_up + ' points')
