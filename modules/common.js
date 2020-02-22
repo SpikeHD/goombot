@@ -10,3 +10,7 @@ exports.loadPrefixes = (client) => {
     })
   })
 }
+
+exports.applySettings = (client, data) => {
+  // Placeholder for now
+}

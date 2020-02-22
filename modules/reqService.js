@@ -1,40 +1,39 @@
-const http = require('http')
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
 const { parse } = require('querystring')
 
+app.use(bodyParser.urlencoded())
+app.use(bodyParser.json())
+
+const common = require('../modules/common.js')
+
 exports.startService = (client) => {
-  http.createServer((req, res) => {
-    if (req.method === 'POST') {
-      var obj = parse(req.url)
-      var firstKey = Object.keys(obj)[0]
-      obj[firstKey.replace('/?' || '?', '')] = obj[firstKey]
+  app.get('/', (req, res) => {
+    // Send success mesage
+    res.send({ status: 'success!' })
 
-      delete obj[firstKey]
+    if (req.method === 'GET') {
+      client.logger.log('POST: ' + JSON.stringify(req.body), 'debug')
 
-      client.logger.log('POST: ' + JSON.stringify(obj), 'debug')
-
-      switch (obj.action) {
+      switch (req.query.action) {
         case 'refreshPrefix':
           try {
-            var exists = false
-
-            client.guildPrefixes.some(g => {
-              if (g.GuildID === obj.guildID) {
-                if (client.guildPrefixes.indexOf(g)) {
-                  client.guildPrefixes[client.guildPrefixes.indexOf(g)].Prefix = obj.prefix
-                }
-                exists = true
-              }
-            })
-
-            if (!exists) client.guildPrefixes.push({ GuildID: obj.guildID, Prefix: obj.prefix })
+            client.guildPrefixes.push({ GuildID: String(req.body.guildid), Prefix: req.body.prefix })
+            console.log(client.guildPrefixes)
           } catch (e) {
             client.logger.log(e, 'error')
           }
+          break
+
+        case 'changeSettings':
+          common.applySettings(client, req.body)
+          break
       }
     }
 
     res.end()
-  }).listen(3000)
+  })
 
-  client.logger.log('Backend connection service ready', 'ready')
+  app.listen(3000, () => client.logger.log('Backend connection service ready', 'ready'))
 }
