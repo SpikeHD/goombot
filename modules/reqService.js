@@ -10,17 +10,26 @@ const common = require('../modules/common.js')
 
 exports.startService = (client) => {
   app.get('/', (req, res) => {
-    // Send success mesage
-    res.send({ status: 'success!' })
-
     if (req.method === 'GET') {
       client.logger.log('POST: ' + JSON.stringify(req.body), 'debug')
+
+      res.send({ message: 'success' })
 
       switch (req.query.action) {
         case 'refreshPrefix':
           try {
             client.guildPrefixes.push({ GuildID: String(req.body.guildid), Prefix: req.body.prefix })
-            console.log(client.guildPrefixes)
+
+            client.mysql.query(`SELECT PremiumGuild FROM guilds WHERE GuildID=${req.body.guildid}`, (err, row) => {
+              if (err) throw err
+
+              var isPremium = row[0].PremiumGuild
+              if (isPremium) {
+                client.mysql.query(`UPDATE guilds SET Prefix=${req.body.prefix}`, (err, row) => {
+                  if (err) throw err
+                })
+              }
+            })
           } catch (e) {
             client.logger.log(e, 'error')
           }
