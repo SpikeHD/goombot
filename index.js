@@ -33,7 +33,7 @@ client.once('ready', () => {
     if (row.affectedRows !== 0) {
       client.mysql.query('SELECT * FROM bot_crashes ORDER BY onlineTime DESC LIMIT 1', (err, rows) => {
         if (err) throw err
-        client.logger.log('Detected outage that lasted ' + moment.duration(rows[0].onlineTime - rows[0].crashTime).asMinutes() + ' seconds', 'warn')
+        client.logger.log('Detected outage that lasted ' + moment.duration(rows[0].onlineTime - rows[0].crashTime).asMinutes() + ' minutes', 'warn')
       })
     }
   })
