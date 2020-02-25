@@ -1,40 +1,45 @@
-const http = require('http')
-const { parse } = require('querystring')
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+
+const common = require('../modules/common.js')
 
 exports.startService = (client) => {
-  http.createServer((req, res) => {
-    if (req.method === 'POST') {
-      var obj = parse(req.url)
-      var firstKey = Object.keys(obj)[0]
-      obj[firstKey.replace('/?' || '?', '')] = obj[firstKey]
+  app.get('/', (req, res) => {
+    if (req.method === 'GET') {
+      client.logger.log('GET: ' + JSON.stringify(req.body), 'debug')
 
-      delete obj[firstKey]
+      res.send({ message: 'success' })
 
-      client.logger.log('POST: ' + JSON.stringify(obj), 'debug')
-
-      switch (obj.action) {
+      switch (req.query.action) {
         case 'refreshPrefix':
           try {
-            var exists = false
+            client.guildPrefixes.push({ GuildID: String(req.body.guildid), Prefix: req.body.prefix })
 
-            client.guildPrefixes.some(g => {
-              if (g.GuildID === obj.guildID) {
-                if (client.guildPrefixes.indexOf(g)) {
-                  client.guildPrefixes[client.guildPrefixes.indexOf(g)].Prefix = obj.prefix
-                }
-                exists = true
+            client.mysql.query(`SELECT PremiumGuild FROM guilds WHERE GuildID=${req.body.guildid}`, (err, row) => {
+              if (err) throw err
+
+              var isPremium = row[0].PremiumGuild
+              if (isPremium) {
+                client.mysql.query(`UPDATE guilds SET Prefix=${req.body.prefix}`, (err) => {
+                  if (err) throw err
+                })
               }
             })
-
-            if (!exists) client.guildPrefixes.push({ GuildID: obj.guildID, Prefix: obj.prefix })
           } catch (e) {
             client.logger.log(e, 'error')
           }
+          break
+
+        case 'changeSettings':
+          common.applySettings(client, req.body)
+          break
       }
     }
+  })
 
-    res.end()
-  }).listen(3000)
-
-  client.logger.log('Backend connection service ready', 'ready')
+  app.listen(3001, () => client.logger.log('Backend connection service ready', 'ready'))
 }

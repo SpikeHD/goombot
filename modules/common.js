@@ -1,4 +1,4 @@
-exports.loadPrefixes = (client) => {
+exports.load = (client) => {
   client.mysql.getConnection(function (err, conn) {
     if (err) throw err
     client.logger.log('MySQL Database Ready', 'ready')
@@ -9,4 +9,8 @@ exports.loadPrefixes = (client) => {
       client.guildPrefixes = Object.values(JSON.parse(JSON.stringify(result)))
     })
   })
+}
+
+exports.applySettings = (client, data) => {
+  // Placeholder for now
 }
