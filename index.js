@@ -27,8 +27,6 @@ client.once('ready', () => {
   client.server.startService(client)
   common.load(client)
 
-  setInterval(() => todayCheck(Date.now()), 1000)
-
   // Check and update outages
   client.mysql.query(`UPDATE bot_crashes SET onlineTime=${Date.now()} WHERE onlineTime=0`, (err, row) => {
     if (err) throw err
@@ -43,11 +41,7 @@ client.once('ready', () => {
 
 client.on('message', (message) => {
   // Find the prefix that exists for this guild
-  var prefix = client.guildPrefixes.find(x => x.GuildID === message.guild.id).Prefix
-
-  // Count messages
-  var index = client.sentMessages.find(x => x.guildID === message.guild.id)
-  client.sentMessages[client.sentMessages.indexOf(index)].messages += 1
+  var prefix = client.guildPrefixes.find(x => x.GuildID === message.channel.guild.id).Prefix
 
   if (!message.content.startsWith(prefix) || message.author.bot) return
 
@@ -68,22 +62,3 @@ process.on('uncaughtException', function (err) {
     }
   })
 })
-
-function todayCheck (timestamp) {
-  var time = moment(moment().diff(moment(timestamp)))
-
-  // If the difference is currently 23:55:00 or more, and we haven't already checked today
-  if (time.hours() === 23 && time.minutes() >= 0 && client.lastTimestamp + (1385000 * 60) < moment()) {
-    client.lastTimestamp = Date.now()
-
-    // This might be killer, so we only use one connection
-    client.mysql.getConnection(function (err, conn) {
-      if (err) throw err
-      client.sentMessages.forEach(g => {
-        conn.query(`INSERT INTO daily_messages (guildID, messages, timestamp) VALUES (${g.guildID}, ${g.messages}, ${client.lastTimestamp - (400 * 60 * 60 * 60)})`, (err) => {
-          if (err) throw err
-        })
-      })
-    })
-  }
-}

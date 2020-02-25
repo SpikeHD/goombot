@@ -8,20 +8,6 @@ exports.load = (client) => {
       if (err) throw err
       client.guildPrefixes = Object.values(JSON.parse(JSON.stringify(result)))
     })
-
-    conn.query('SELECT timestamp FROM daily_messages ORDER BY timestamp desc', (err, result) => {
-      if (err) throw err
-      if (!result[0]) return
-
-      // Get the most recent timestamp, doesn't matter which one because they're all the same per day
-      var timestamp = result[0].timestamp
-      client.lastTimestamp = timestamp
-
-      conn.query(`SELECT guildID, messages FROM daily_messages WHERE timestamp = ${client.lastTimestamp}`, (err, tResult) => {
-        if (err) throw err
-        client.sentMessages = Object.values(JSON.parse(JSON.stringify(tResult)))
-      })
-    })
   })
 }
 
