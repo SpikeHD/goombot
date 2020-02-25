@@ -25,7 +25,7 @@ handler.load(client)
 client.once('ready', () => {
   client.logger.log('Client Ready', 'ready')
   client.server.startService(client)
-  common.loadPrefixes(client)
+  common.load(client)
 
   // Check and update outages
   client.mysql.query(`UPDATE bot_crashes SET onlineTime=${Date.now()} WHERE onlineTime=0`, (err, row) => {

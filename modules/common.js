@@ -1,4 +1,4 @@
-exports.loadPrefixes = (client) => {
+exports.load = (client) => {
   client.mysql.getConnection(function (err, conn) {
     if (err) throw err
     client.logger.log('MySQL Database Ready', 'ready')

@@ -41,5 +41,5 @@ exports.startService = (client) => {
     }
   })
 
-  app.listen(3000, () => client.logger.log('Backend connection service ready', 'ready'))
+  app.listen(3001, () => client.logger.log('Backend connection service ready', 'ready'))
 }
