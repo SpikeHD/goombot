@@ -1,4 +1,5 @@
 const express = require('express')
+const moment = require('moment')
 const bodyParser = require('body-parser')
 const app = express()
 
@@ -54,6 +55,12 @@ exports.startService = (client) => {
                 // If no days amount has been provided, just do the last week
                 obj.dailyData = mRows.slice(0, 7)
               }
+
+              obj.dailyData.forEach(o => {
+                var i = obj.dailyData.indexOf(o)
+
+                obj.dailyData[i].date = moment(o.timestamp * 1000).format('MM/DD/YYYY')
+              })
 
               res.send(obj)
             })
