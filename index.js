@@ -84,7 +84,7 @@ function todayCheck (timestamp) {
     // This might be killer, so we only use one connection
     client.mysql.getConnection(function (err, conn) {
       if (err) throw err
-      var statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES ';
+      var statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES '
 
       client.dailyData.forEach(g => {
         statement += `(${g.guildID}, ${g.messages}, ${g.users}, ${client.lastTimestamp - (400 * 60 * 60 * 60)}),`

@@ -3,5 +3,7 @@
     "dbname":"",
     "dbhost":"",
     "dbuser":"",
-    "dbpass":""
+    "dbpass":"",
+    "clientid": "",
+    "clientsecret": ""
 }
