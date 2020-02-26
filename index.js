@@ -55,24 +55,24 @@ client.on('message', (message) => {
 })
 
 client.on('guildMemberAdd', (member) => {
-  var uIndex = client.joinedUsers.find(x => x.guildID === member.guild.id)
-  client.joinedUsers[client.joinedUsers.indexOf(uIndex)].messages += 1
+  var uIndex = client.dailyData.find(x => x.guildID === member.guild.id)
+  client.dailyData[client.dailyData.indexOf(uIndex)].users += 1
 })
 
 client.login(client.config.token)
 
-process.on('uncaughtException', function (err) {
-  client.logger.log('Caught exception: ' + err, 'error')
+// process.on('uncaughtException', function (err) {
+//   client.logger.log('Caught exception: ' + err, 'error')
 
-  // Assume MySQL is still working
-  client.mysql.query(`INSERT INTO bot_crashes(crashTime) VALUES(${Date.now()})`, (err, row) => {
-    if (err) process.exit()
-    if (row) {
-      client.logger.log('Outage entry created. See you in the afterlife o7', 'log')
-      process.exit()
-    }
-  })
-})
+//   // Assume MySQL is still working
+//   client.mysql.query(`INSERT INTO bot_crashes(crashTime) VALUES(${Date.now()})`, (err, row) => {
+//     if (err) process.exit()
+//     if (row) {
+//       client.logger.log('Outage entry created. See you in the afterlife o7', 'log')
+//       process.exit()
+//     }
+//   })
+// })
 
 function todayCheck (timestamp) {
   var time = moment(moment().diff(moment(timestamp)))
@@ -87,7 +87,7 @@ function todayCheck (timestamp) {
       var statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES ';
 
       client.dailyData.forEach(g => {
-        statement += `(${g.guildID}, ${g.messages}, ${g.joinedUsers}, ${client.lastTimestamp - (400 * 60 * 60 * 60)}),`
+        statement += `(${g.guildID}, ${g.messages}, ${g.users}, ${client.lastTimestamp - (400 * 60 * 60 * 60)}),`
       })
 
       conn.query(statement, (err) => {
