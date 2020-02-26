@@ -16,7 +16,7 @@ exports.load = (client) => {
       var timestamp = result[0].timestamp
       client.lastTimestamp = timestamp
 
-      conn.query(`SELECT guildID, messages FROM daily_data WHERE timestamp = ${client.lastTimestamp}`, (err, tResult) => {
+      conn.query(`SELECT guildID, messages, users FROM daily_data WHERE timestamp = ${client.lastTimestamp}`, (err, tResult) => {
         if (err) throw err
         client.dailyData = Object.values(JSON.parse(JSON.stringify(tResult)))
       })

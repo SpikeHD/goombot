@@ -12,8 +12,6 @@ exports.startService = (client) => {
     if (req.method === 'GET') {
       client.logger.log('GET: ' + JSON.stringify(req.body), 'debug')
 
-      res.send({ message: 'success' })
-
       switch (req.query.action) {
         case 'refreshPrefix':
           try {
@@ -36,6 +34,26 @@ exports.startService = (client) => {
 
         case 'changeSettings':
           common.applySettings(client, req.body)
+          break
+
+        case 'guildInfo':
+          if (!req.body.guildID) return res.send({ message: 'failure' })
+          client.mysql.query(`SELECT PremiumGuild, OwnerID FROM guilds WHERE GuildID=${req.body.guildID}`, (err, rows) => {
+            if (err) throw err
+
+            var obj = { ownerID: rows[0].OwnerID, premiumGuild: rows[0].PremiumGuild, messages: 0, users: 0 }
+
+            client.mysql.query(`SELECT messages, users FROM daily_data WHERE timestamp > 0 AND guildID=${req.body.guildID} ORDER BY timestamp DESC`, (err, mRows) => {
+              if (err) throw err
+              console.log(mRows)
+              if (mRows[0]) {
+                obj.messages = mRows[0].messages
+                obj.users = mRows[0].users
+              }
+
+              res.send(obj)
+            })
+          })
           break
       }
     }

@@ -27,6 +27,8 @@ client.once('ready', () => {
   client.server.startService(client)
   common.load(client)
 
+  setInterval(() => todayCheck(), 1000)
+
   // Check and update outages
   client.mysql.query(`UPDATE bot_crashes SET onlineTime=${Date.now()} WHERE onlineTime=0`, (err, row) => {
     if (err) throw err
@@ -53,8 +55,8 @@ client.on('message', (message) => {
 })
 
 client.on('guildMemberAdd', (member) => {
-  var uIndex = client.joinedUsers.find(x => x.guildID === member.guild.id)
-  client.joinedUsers[client.joinedUsers.indexOf(uIndex)].messages += 1
+  var uIndex = client.dailyData.find(x => x.guildID === member.guild.id)
+  client.dailyData[client.dailyData.indexOf(uIndex)].users += 1
 })
 
 client.login(client.config.token)
@@ -85,7 +87,7 @@ function todayCheck (timestamp) {
       var statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES ';
 
       client.dailyData.forEach(g => {
-        statement += `(${g.guildID}, ${g.messages}, ${g.joinedUsers}, ${client.lastTimestamp - (400 * 60 * 60 * 60)}),`
+        statement += `(${g.guildID}, ${g.messages}, ${g.users}, ${client.lastTimestamp - (400 * 60 * 60 * 60)}),`
       })
 
       conn.query(statement, (err) => {
