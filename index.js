@@ -41,11 +41,20 @@ client.once('ready', () => {
 
 client.on('message', (message) => {
   // Find the prefix that exists for this guild
-  var prefix = client.guildPrefixes.find(x => x.GuildID === message.channel.guild.id).Prefix
+  var prefix = client.guildPrefixes.find(x => x.GuildID === message.guild.id).Prefix
+
+  // Count messages
+  var mIndex = client.dailyData.find(x => x.guildID === message.guild.id)
+  client.dailyData[client.dailyData.indexOf(mIndex)].messages += 1
 
   if (!message.content.startsWith(prefix) || message.author.bot) return
 
   handler.handle(client, message, prefix)
+})
+
+client.on('guildMemberAdd', (member) => {
+  var uIndex = client.joinedUsers.find(x => x.guildID === member.guild.id)
+  client.joinedUsers[client.joinedUsers.indexOf(uIndex)].messages += 1
 })
 
 client.login(client.config.token)
@@ -62,3 +71,26 @@ process.on('uncaughtException', function (err) {
     }
   })
 })
+
+function todayCheck (timestamp) {
+  var time = moment(moment().diff(moment(timestamp)))
+
+  // If the difference is currently 23:55:00 or more, and we haven't already checked today
+  if (time.hours() === 23 && time.minutes() >= 0 && client.lastTimestamp + (1385000 * 60) < moment()) {
+    client.lastTimestamp = Date.now()
+
+    // This might be killer, so we only use one connection
+    client.mysql.getConnection(function (err, conn) {
+      if (err) throw err
+      var statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES ';
+
+      client.dailyData.forEach(g => {
+        statement += `(${g.guildID}, ${g.messages}, ${g.joinedUsers}, ${client.lastTimestamp - (400 * 60 * 60 * 60)}),`
+      })
+
+      conn.query(statement, (err) => {
+        if (err) throw err
+      })
+    })
+  }
+}
