@@ -41,14 +41,18 @@ exports.startService = (client) => {
           client.mysql.query(`SELECT PremiumGuild, OwnerID FROM guilds WHERE GuildID=${req.body.guildID}`, (err, rows) => {
             if (err) throw err
 
-            var obj = { ownerID: rows[0].OwnerID, premiumGuild: rows[0].PremiumGuild, messages: 0, users: 0 }
+            var obj = { ownerID: rows[0].OwnerID, premiumGuild: rows[0].PremiumGuild, dailyData: [] }
 
-            client.mysql.query(`SELECT messages, users FROM daily_data WHERE timestamp > 0 AND guildID=${req.body.guildID} ORDER BY timestamp DESC`, (err, mRows) => {
+            client.mysql.query(`SELECT messages, users, timestamp FROM daily_data WHERE timestamp > 0 AND guildID=${req.body.guildID} ORDER BY timestamp DESC`, (err, mRows) => {
               if (err) throw err
-              console.log(mRows)
-              if (mRows[0]) {
-                obj.messages = mRows[0].messages
-                obj.users = mRows[0].users
+
+              if (req.body.days) {
+                // If there are specified days, get that amount unless that amount doesn't exist,
+                // which in that case we just get the maximum we can
+                obj.dailyData = mRows.slice(0, req.body.days > mRows.length ? req.body.days : mRows.length)
+              } else {
+                // If no days amount has been provided, just do the last week
+                obj.dailyData = mRows.slice(0, 7)
               }
 
               res.send(obj)
