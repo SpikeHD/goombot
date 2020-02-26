@@ -41,7 +41,7 @@ exports.startService = (client) => {
           client.mysql.query(`SELECT PremiumGuild, OwnerID FROM guilds WHERE GuildID=${req.body.guildID}`, (err, rows) => {
             if (err) throw err
 
-            var obj = { ownerID: rows[0].OwnerID, premiumGuild: rows[0].PremiumGuild, messages: 0 }
+            var obj = { ownerID: rows[0].OwnerID, premiumGuild: rows[0].PremiumGuild, messages: 0, users: 0 }
 
             client.mysql.query(`SELECT messages, users FROM daily_data WHERE timestamp > 0 AND guildID=${req.body.guildID} ORDER BY timestamp DESC`, (err, mRows) => {
               if (err) throw err
