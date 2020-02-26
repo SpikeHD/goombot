@@ -27,8 +27,6 @@ client.once('ready', () => {
   client.server.startService(client)
   common.load(client)
 
-  setInterval(() => todayCheck(Date.now()), 1000)
-
   // Check and update outages
   client.mysql.query(`UPDATE bot_crashes SET onlineTime=${Date.now()} WHERE onlineTime=0`, (err, row) => {
     if (err) throw err

@@ -8,7 +8,6 @@ exports.load = (client) => {
       if (err) throw err
       client.guildPrefixes = Object.values(JSON.parse(JSON.stringify(result)))
     })
-
     conn.query('SELECT timestamp FROM daily_data ORDER BY timestamp desc', (err, result) => {
       if (err) throw err
       if (!result[0]) return
