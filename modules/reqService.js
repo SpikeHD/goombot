@@ -1,17 +1,19 @@
 const express = require('express')
 const moment = require('moment')
+const cors = require('cors')
 const bodyParser = require('body-parser')
 const app = express()
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use(cors({ origin: '*' }))
 
 const common = require('../modules/common.js')
 
 exports.startService = (client) => {
-  app.get('/', (req, res) => {
-    if (req.method === 'GET') {
-      client.logger.log('GET: ' + JSON.stringify(req.body), 'debug')
+  app.post('/', (req, res) => {
+    if (req.method === 'POST') {
+      client.logger.log('POST: ' + JSON.stringify(req.body), 'debug')
 
       switch (req.query.action) {
         case 'refreshPrefix':
