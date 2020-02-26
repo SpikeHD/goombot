@@ -46,12 +46,17 @@ client.on('message', (message) => {
   var prefix = client.guildPrefixes.find(x => x.GuildID === message.guild.id).Prefix
 
   // Count messages
-  var index = client.sentMessages.find(x => x.guildID === message.guild.id)
-  client.sentMessages[client.sentMessages.indexOf(index)].messages += 1
+  var mIndex = client.dailyData.find(x => x.guildID === message.guild.id)
+  client.dailyData[client.dailyData.indexOf(mIndex)].messages += 1
 
   if (!message.content.startsWith(prefix) || message.author.bot) return
 
   handler.handle(client, message, prefix)
+})
+
+client.on('guildMemberAdd', (member) => {
+  var uIndex = client.joinedUsers.find(x => x.guildID === member.guild.id)
+  client.joinedUsers[client.joinedUsers.indexOf(uIndex)].messages += 1
 })
 
 client.login(client.config.token)
@@ -79,10 +84,14 @@ function todayCheck (timestamp) {
     // This might be killer, so we only use one connection
     client.mysql.getConnection(function (err, conn) {
       if (err) throw err
-      client.sentMessages.forEach(g => {
-        conn.query(`INSERT INTO daily_messages (guildID, messages, timestamp) VALUES (${g.guildID}, ${g.messages}, ${client.lastTimestamp - (400 * 60 * 60 * 60)})`, (err) => {
-          if (err) throw err
-        })
+      var statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES ';
+
+      client.dailyData.forEach(g => {
+        statement += `(${g.guildID}, ${g.messages}, ${g.joinedUsers}, ${client.lastTimestamp - (400 * 60 * 60 * 60)}),`
+      })
+
+      conn.query(statement, (err) => {
+        if (err) throw err
       })
     })
   }
