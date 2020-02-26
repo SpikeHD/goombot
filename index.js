@@ -61,18 +61,18 @@ client.on('guildMemberAdd', (member) => {
 
 client.login(client.config.token)
 
-// process.on('uncaughtException', function (err) {
-//   client.logger.log('Caught exception: ' + err, 'error')
+process.on('uncaughtException', function (err) {
+  client.logger.log('Caught exception: ' + err, 'error')
 
-//   // Assume MySQL is still working
-//   client.mysql.query(`INSERT INTO bot_crashes(crashTime) VALUES(${Date.now()})`, (err, row) => {
-//     if (err) process.exit()
-//     if (row) {
-//       client.logger.log('Outage entry created. See you in the afterlife o7', 'log')
-//       process.exit()
-//     }
-//   })
-// })
+  // Assume MySQL is still working
+  client.mysql.query(`INSERT INTO bot_crashes(crashTime) VALUES(${Date.now()})`, (err, row) => {
+    if (err) process.exit()
+    if (row) {
+      client.logger.log('Outage entry created. See you in the afterlife o7', 'log')
+      process.exit()
+    }
+  })
+})
 
 function todayCheck (timestamp) {
   var time = moment(moment().diff(moment(timestamp)))
