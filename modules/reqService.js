@@ -2,6 +2,7 @@ const express = require('express')
 const moment = require('moment')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const request = require('request')
 const app = express()
 
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -67,6 +68,32 @@ exports.startService = (client) => {
               res.send(obj)
             })
           })
+          break
+        case 'authorize':
+          if (!req.body.code) return res.send({ message: 'failure' })
+
+          try {
+            request.post({
+              json: true,
+              url: 'https://discordapp.com/api/oauth2/token',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              form: {
+                client_id: client.config.clientid,
+                client_secret: client.config.clientsecret,
+                grant_type: 'authorization_code',
+                code: req.body.code,
+                redirect_uri: 'http://localhost:3000'
+              }
+            }, (err, resp, body) => {
+              if (err) return res.send({ message: 'failure' })
+              return res.send(JSON.stringify(body))
+            })
+          } catch (e) {
+            client.logger.error(e)
+          }
+
           break
       }
     }
