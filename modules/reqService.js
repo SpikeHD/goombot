@@ -17,6 +17,30 @@ exports.startService = (client) => {
       client.logger.log('POST: ' + JSON.stringify(req.body), 'debug')
 
       switch (req.query.action) {
+        case 'guilds':
+          try {
+            request.get('https://discordapp.com/api/v6/users/@me/guilds', {
+              headers: {
+                Authorization: `Bearer ${req.body.token}`
+              }
+            }, (err, resp, body) => {
+              if (err) console.log(err)
+              var b = JSON.parse(body)
+              b.forEach(element => {
+                client.guilds.forEach(e => {
+                  if (e.id === element.id) {
+                    element.isBotIn = true
+                  } else {
+                    element.isBotIn = false
+                  }
+                })
+              })
+              res.send(b)
+            })
+          } catch (e) {
+            client.logger.error(e)
+          }
+          break
         case 'refreshPrefix':
           try {
             client.guildPrefixes.push({ GuildID: String(req.body.guildid), Prefix: req.body.prefix })
