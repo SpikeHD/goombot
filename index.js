@@ -46,8 +46,14 @@ client.on('message', (message) => {
   var prefix = client.guildPrefixes.find(x => x.GuildID === message.guild.id).Prefix
 
   // Count messages
-  var mIndex = client.dailyData.find(x => x.guildID === message.guild.id)
-  client.dailyData[client.dailyData.indexOf(mIndex)].messages += 1
+  try {
+    var mIndex = client.dailyData.find(x => x.guildID === message.guild.id)
+    client.dailyData[client.dailyData.indexOf(mIndex)].messages += 1
+  } catch (e) {
+    common.populate(client, message.guild.id)
+    client.logger.log(e, 'error')
+    client.logger.log('Creating entry...', 'log')
+  }
 
   if (!message.content.startsWith(prefix) || message.author.bot) return
 
@@ -55,8 +61,14 @@ client.on('message', (message) => {
 })
 
 client.on('guildMemberAdd', (member) => {
-  var uIndex = client.dailyData.find(x => x.guildID === member.guild.id)
-  client.dailyData[client.dailyData.indexOf(uIndex)].users += 1
+  try {
+    var uIndex = client.dailyData.find(x => x.guildID === member.guild.id)
+    client.dailyData[client.dailyData.indexOf(uIndex)].users += 1
+  } catch (e) {
+    common.populate(client, member.guild.id)
+    client.logger.log(e, 'error')
+    client.logger.log('Creating entry...', 'log')
+  }
 })
 
 client.login(client.config.token)
