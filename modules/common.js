@@ -24,6 +24,14 @@ exports.load = (client) => {
   })
 }
 
+exports.populate = (client, guildid) => {
+  client.dailyData.push({
+    guildID: guildid,
+    messages: 0,
+    users: 0
+  })
+}
+
 exports.applySettings = (client, data) => {
   // Placeholder for now
 }
