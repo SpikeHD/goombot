@@ -32,6 +32,35 @@ exports.populate = (client, guildid) => {
   })
 }
 
+exports.quickSave = async (client) => {
+  return new Promise(function (resolve, reject) {
+    client.logger.log('saving todays data entry...', 'log')
+
+    console.log(client.dailyData)
+    console.log(client.lastTimestamp)
+
+    var statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES '
+    var i = 0
+
+    client.dailyData.forEach(g => {
+      i++
+      statement += `(${g.guildID}, ${g.messages}, ${g.users}, ${client.lastTimestamp - (400 * 60 * 60 * 60)})`
+      if (i !== client.dailyData.length) statement += ', '
+    })
+
+    console.log('statement created')
+    console.log(statement)
+
+    client.mysql.getConnection((err, con) => {
+      if (err) throw err
+      con.query(statement, (err, rows) => {
+        if (err) throw err
+        resolve(rows)
+      })
+    })
+  })
+}
+
 exports.applySettings = (client, data) => {
   // Placeholder for now
 }

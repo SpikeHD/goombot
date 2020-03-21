@@ -73,7 +73,7 @@ client.on('guildMemberAdd', (member) => {
 
 client.login(client.config.token)
 
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', async function (err) {
   client.logger.log('Caught exception: ' + err, 'error')
 
   // Assume MySQL is still working
@@ -81,7 +81,11 @@ process.on('uncaughtException', function (err) {
     if (err) process.exit()
     if (row) {
       client.logger.log('Outage entry created. See you in the afterlife o7', 'log')
-      process.exit()
+
+      // Also assume common functions are working
+      common.quickSave(client).then(ret => {
+        process.exit()
+      })
     }
   })
 })
