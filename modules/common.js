@@ -82,7 +82,7 @@ exports.quickSave = async (client) => {
         statement += `WHEN ${g.guildID} THEN ${g.users} `
       })
 
-      statement += ` END WHERE guildID ${endWhere}`
+      statement += ` END WHERE guildID ${endWhere} AND timestamp = ${client.lastTimestamp}`
 
       client.mysql.getConnection((err, con) => {
         if (err) throw err
