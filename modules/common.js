@@ -34,30 +34,64 @@ exports.populate = (client, guildid) => {
 
 exports.quickSave = async (client) => {
   return new Promise(function (resolve, reject) {
-    client.logger.log('saving todays data entry...', 'log')
+    var statement, i
 
-    console.log(client.dailyData)
-    console.log(client.lastTimestamp)
+    // If the last timestamp is less than than a 24 hours behind right now
+    if (client.lastTimestamp < Date.now() - 86400) {
+      client.logger.log('Saving todays data entry...', 'log')
 
-    var statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES '
-    var i = 0
+      statement = 'INSERT INTO daily_data (guildID, messages, users, timestamp) VALUES '
+      i = 0
 
-    client.dailyData.forEach(g => {
-      i++
-      statement += `(${g.guildID}, ${g.messages}, ${g.users}, ${client.lastTimestamp - (400 * 60 * 60 * 60)})`
-      if (i !== client.dailyData.length) statement += ', '
-    })
-
-    console.log('statement created')
-    console.log(statement)
-
-    client.mysql.getConnection((err, con) => {
-      if (err) throw err
-      con.query(statement, (err, rows) => {
-        if (err) throw err
-        resolve(rows)
+      client.dailyData.forEach(g => {
+        i++
+        statement += `(${g.guildID}, ${g.messages}, ${g.users}, ${client.lastTimestamp - (400 * 60 * 60 * 60)})`
+        if (i !== client.dailyData.length) statement += ', '
       })
-    })
+
+      client.mysql.getConnection((err, con) => {
+        if (err) throw err
+        con.query(statement, (err, rows) => {
+          if (err) throw err
+          resolve(rows)
+        })
+      })
+    } else {
+      var endWhere = 'IN('
+      client.logger.log('Updating todays data entry...', 'log')
+
+      statement = 'UPDATE daily_data SET messages = CASE guildID '
+      i = 0
+
+      // First update all of the messages
+      client.dailyData.forEach(g => {
+        i++
+        statement += `WHEN ${g.guildID} THEN ${g.messages} `
+        endWhere += `${g.guildID}`
+
+        if (i !== client.dailyData.length) endWhere += ', '
+      })
+
+      endWhere += ')'
+      statement += 'ELSE guildID END, users = CASE guildID '
+      i = 0
+
+      // Then do the same with users
+      client.dailyData.forEach(g => {
+        i++
+        statement += `WHEN ${g.guildID} THEN ${g.users} `
+      })
+
+      statement += ` END WHERE guildID ${endWhere}`
+
+      client.mysql.getConnection((err, con) => {
+        if (err) throw err
+        con.query(statement, (err, rows) => {
+          if (err) throw err
+          resolve(rows)
+        })
+      })
+    }
   })
 }
 

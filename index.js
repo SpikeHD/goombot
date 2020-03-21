@@ -84,6 +84,7 @@ process.on('uncaughtException', async function (err) {
 
       // Also assume common functions are working
       common.quickSave(client).then(ret => {
+        client.logger.log(`Created ${ret.affectedRows} quick-entries`, 'log')
         process.exit()
       })
     }
