@@ -17,13 +17,17 @@
   },
   "homepage": "https://github.com/spikegd/goombot#readme",
   "dependencies": {
+    "@tensorflow/tfjs": "^1.7.1",
+    "@tensorflow/tfjs-node": "^1.7.1",
     "body-parser": "^1.19.0",
+    "canvas": "^2.6.1",
     "chalk": "^3.0.0",
     "cors": "^2.8.5",
     "discord.js": "^11.5.1",
     "express": "^4.17.1",
     "moment": "^2.24.0",
     "mysql": "^2.18.1",
+    "nsfwjs": "^2.1.0",
     "request": "^2.88.2"
   },
   "devDependencies": {

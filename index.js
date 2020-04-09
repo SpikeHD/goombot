@@ -1,5 +1,6 @@
 const handler = require('./modules/handler.js')
 const common = require('./modules/common.js')
+const nsfw = require('./modules/nsfwHandler.js')
 const moment = require('moment')
 const Discord = require('discord.js')
 const client = new Discord.Client()
@@ -42,6 +43,11 @@ client.once('ready', () => {
 })
 
 client.on('message', (message) => {
+  if (message.attachments) {
+    message.attachments.forEach(attachment => {
+      nsfw.checkImage(attachment.url, message)
+    });
+  }
   // Find the prefix that exists for this guild
   var prefix = client.guildPrefixes.find(x => x.GuildID === message.guild.id).Prefix
 
